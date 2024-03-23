@@ -1,15 +1,14 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from "react";
 
 interface Props extends IntersectionObserverInit {
   onIntersect: IntersectionObserverCallback;
-  triggerOnce?: boolean;
 }
 
 const DEFAULT_THRESHOLD = 1.0;
 
 const useIntersectionObserver = <T extends HTMLElement>({
   root,
-  rootMargin = '0px',
+  rootMargin = "0px",
   threshold = DEFAULT_THRESHOLD,
   onIntersect,
 }: Props) => {
@@ -17,14 +16,15 @@ const useIntersectionObserver = <T extends HTMLElement>({
   const callback = useCallback<IntersectionObserverCallback>(
     (entries, observer) => {
       entries.forEach((entry) => {
-        onIntersect([entry], observer);
+        if (entry.isIntersecting) onIntersect([entry], observer);
       });
     },
-    [onIntersect],
+    [onIntersect]
   );
 
   useEffect(() => {
-    if (ref.current === null) return;
+    const currentRef = ref.current;
+    if (currentRef === null) return;
 
     const observer = new IntersectionObserver(callback, {
       root,
@@ -32,9 +32,8 @@ const useIntersectionObserver = <T extends HTMLElement>({
       threshold,
     });
 
-    const currentRef = ref.current;
     observer.observe(currentRef);
-    
+
     return () => {
       if (currentRef) observer.unobserve(currentRef);
     };
